@@ -110,11 +110,13 @@ int main(int argc, char *argv[]) {
   start = my_gettimeofday();
     
   init_uniform_random_number();
- #pragma omp parallel num_threads(12)
+ #pragma omp parallel num_threads(64)
 {
 
-  #pragma omp for
-  for (i = 0; i < n; i++) {
+/* t'as fait n'importe quoi faut declarer les r et t er b comme privee */
+  //#pragma omp for
+#pragma omp parallel for private(x) reduction(+:t) reduction(+:r) reduction(+:b)
+for (i = 0; i < n; i++) {
     d = 0.0;
     x = 0.0;
 
@@ -123,20 +125,30 @@ int main(int argc, char *argv[]) {
       u = uniform_random_number();
       L = -(1 / c) * log(u);
       x = x + L * cos(d);
-      if (x < 0) {
-	r++;
-	break;
-      } else if (x >= h) {
-	t++;
-	break;
-      } else if ((u = uniform_random_number()) < c_c / c) {
-	b++;
-	absorbed[j++] = x;
-	break;
-      } else {
-	u = uniform_random_number();
-	d = u * M_PI;
-      }
+      if (x < 0) 
+	{
+//#pragma omp atomic
+	  r++;
+	  break;
+        } 
+	else if (x >= h) 
+	{
+//#pragma omp atomic
+       	  t++;
+	  break;
+      } 
+	else if ((u = uniform_random_number()) < c_c / c) 
+      {
+//#pragma omp atomic
+	  b++;
+	  absorbed[j++] = x;
+	  break;
+      } 
+	else 
+	{
+	  u = uniform_random_number();
+       	  d = u * M_PI;
+        }
     }
   }
 
