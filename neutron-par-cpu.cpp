@@ -110,10 +110,11 @@ int main(int argc, char *argv[]) {
   start = my_gettimeofday();
     
   init_uniform_random_number();
- #pragma omp parallel num_threads(64)
+ #pragma omp parallel num_threads(32)
 {
 
-/* t'as fait n'importe quoi faut declarer les r et t er b comme privee */
+/* shoud I put u et x et L on private???!! */
+
   //#pragma omp for
 #pragma omp parallel for private(x) reduction(+:t) reduction(+:r) reduction(+:b)
 for (i = 0; i < n; i++) {
