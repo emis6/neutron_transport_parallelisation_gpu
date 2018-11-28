@@ -1,19 +1,19 @@
-SRCS = neutron.cu
-EXE_NAME = neutron
-OBJECTS = neutron.o
+SRCS = neutron-omp.cu
+EXE_NAME = neutron-omp
+OBJECTS = neutron-omp.o
 
 CC = gcc
 CFLAGS = -O3 -arch=sm_20 -lineinfo   #-std=c11
-LIB=-lm -L/usr/local/cuda/lib64/ -lcuda -lcudart
-NVCC= /usr/local/cuda/bin/nvcc 
+LIB=-lm -L/usr/local/cuda/lib64/ -lcuda -lcudart #-openmp
+NVCC= /usr/local/cuda/bin/nvcc -Xcompiler -fopenmp
 
 
 all: ${EXE_NAME}
 
-neutron.o : neutron.cu
+neutron-omp.o : neutron-omp.cu
 	$(NVCC) -c $(CFLAGS) $< 
 
-neutron : neutron.o
+neutron-omp : neutron-omp.o
 	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
 
 clean:

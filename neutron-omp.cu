@@ -70,7 +70,7 @@ __global__ void generate_kernel(curandState *state,
   	int fin_for = (id+1)*step;
 
   	if(id == nbThread) fin_for = N;
-  
+  #pragma omp parallel for private(x, u, d, L) reduction(+:t,r,b)
     for (int i = debut_for; i < fin_for; i++) {
         d = 0.0;
         x = 0.0;
