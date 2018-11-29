@@ -144,6 +144,8 @@ int main(int argc, char *argv[]) {
     double start, finish;
     int j = 0; // compteurs 
 
+    int pourcentage_cpu = 20;
+
     if( argc == 1)
     fprintf( stderr, "%s\n", info);
 
