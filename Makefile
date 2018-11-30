@@ -1,6 +1,6 @@
-SRCS = neutron-omp.cu
-EXE_NAME = neutron-omp
-OBJECTS = neutron-omp.o
+SRCS = neutron-omp.cu neutron-omp2.cu neutron.cu
+EXE_NAME = neutron-omp neutron-omp2 neutron
+OBJECTS = neutron-omp.o neutron-omp2.o neutron.o
 
 CC = gcc
 CFLAGS = -O3 -arch=sm_20 -lineinfo   #-std=c11
@@ -15,6 +15,20 @@ neutron-omp.o : neutron-omp.cu
 
 neutron-omp : neutron-omp.o
 	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
+
+neutron-omp2.o : neutron-omp2.cu
+	$(NVCC) -c $(CFLAGS) $< 
+
+neutron-omp2 : neutron-omp2.o
+	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
+
+neutron.o : neutron.cu
+	$(NVCC) -c $(CFLAGS) $< 
+
+neutron : neutron.o
+	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
+
+
 
 clean:
 	rm -f ${EXE_NAME} *.o *~
