@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
   start = my_gettimeofday();
     
   init_uniform_random_number();
-// #pragma omp parallel num_threads(4)
+#pragma omp parallel num_threads(4)
 {
 
 /* shoud I put u et x et L on private???!! */

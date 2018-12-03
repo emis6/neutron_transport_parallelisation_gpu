@@ -46,7 +46,7 @@ __global__ void setup_kernel(curandState *state)
 
 
 __global__ void generate_kernel(curandState *state,
-                                int step, unsigned int nbThread, dim3 TailleGrille, unsigned int N, float c, float c_c,float h, int* R, int* B,int* T,float* absorbed)
+                                int step, unsigned int nbThread, dim3 TailleGrille, unsigned int N, float c, float c_c,float h, int* R, int* B,int* T,float* absorbed, int* j)
 {
 	int id = threadIdx.x + blockIdx.x *TailleGrille.x;
 
@@ -88,7 +88,8 @@ __global__ void generate_kernel(curandState *state,
                 break;
             } else if ((u = curand_uniform(&localState)) < c_c / c) {
                 b++;
-                absorbed[i] = x;
+                atomicAdd(j,1);
+                absorbed[(*j)] = x;
                 break;
             } else {
                 u = curand_uniform(&localState);
@@ -103,14 +104,14 @@ __global__ void generate_kernel(curandState *state,
 
     //reduction :
     __syncthreads();
-    int j=blockDim.x/2;
-    while (j>0){
-        if(threadIdx.x<j){
-            Rtab[threadIdx.x]+=Rtab[threadIdx.x +j];
-            Btab[threadIdx.x]+=Btab[threadIdx.x +j];
-            Ttab[threadIdx.x]+=Ttab[threadIdx.x +j];
+    int k=blockDim.x/2;
+    while (k>0){
+        if(threadIdx.x<k){
+            Rtab[threadIdx.x]+=Rtab[threadIdx.x +k];
+            Btab[threadIdx.x]+=Btab[threadIdx.x +k];
+            Ttab[threadIdx.x]+=Ttab[threadIdx.x +k];
         }
-        j/=2;
+        k/=2;
         __syncthreads();
     }
     if(threadIdx.x==0){
@@ -181,16 +182,19 @@ int main(int argc, char *argv[]) {
     int size = n*sizeof(float);
     cudaMalloc((void**)&d_absorbed, size);
 
-    int *d_r, *d_b, *d_t;
+    int *d_r, *d_b, *d_t, *d_j;
     cudaMalloc((void**)&d_r, sizeof(int));
     cudaMalloc((void**)&d_b, sizeof(int));
     cudaMalloc((void**)&d_t, sizeof(int));
+    cudaMalloc((void**)&d_j, sizeof(int));
 
     // Transfert CPU -> GPU
     cudaMemcpy(d_absorbed, absorbed, size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_r, &r, sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, &b, sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_t, &t, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_j, &j, sizeof(int), cudaMemcpyHostToDevice);
+
 
     // Definition nombre de threads
     dim3 TailleGrille, ThreadparBlock;
@@ -220,7 +224,7 @@ int main(int argc, char *argv[]) {
     setup_kernel<<<TailleGrille,ThreadparBlock>>>(d_States);
 
     //appel kernel2 : calcul
-    generate_kernel<<<TailleGrille,ThreadparBlock>>>(d_States,step,nbThread,TailleGrille,n,c,c_c,h,d_r,d_b,d_t,d_absorbed);
+    generate_kernel<<<TailleGrille,ThreadparBlock>>>(d_States,step,nbThread,TailleGrille,n,c,c_c,h,d_r,d_b,d_t,d_absorbed, d_j);
 
     // fin du chronometrage
     finish = my_gettimeofday();
