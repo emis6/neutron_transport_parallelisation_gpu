@@ -46,19 +46,19 @@ for i in range(0, len(n)):
 
 		print("finished GPU")
 
-		p = Popen(['./neutron-seq', str(h), str(n[i]) ], shell=False, stdin=PIPE, stdout=PIPE)
-		out, err = p.communicate()
-		sum_time_seq += getTotTime(out.decode("utf-8"))
+		# p = Popen(['./neutron-seq', str(h), str(n[i]) ], shell=False, stdin=PIPE, stdout=PIPE)
+		# out, err = p.communicate()
+		# sum_time_seq += getTotTime(out.decode("utf-8"))
 
 		print("finished seq")
 
-		p = Popen(['./neutron-omp', str(h), str(n[i]) ], shell=False, stdin=PIPE, stdout=PIPE)
-		out, err = p.communicate()
-		sum_time_omp += getTotTime(out.decode("utf-8"))
+		# p = Popen(['./neutron-omp', str(h), str(n[i]) ], shell=False, stdin=PIPE, stdout=PIPE)
+		# out, err = p.communicate()
+		# sum_time_omp += getTotTime(out.decode("utf-8"))
 
 		print("finished CPU par")
 
-		p = Popen(['./neutron-omp2', str(h), str(n[i]) ], shell=False, stdin=PIPE, stdout=PIPE)
+		p = Popen(['./neutron-test', str(h), str(n[i]) ], shell=False, stdin=PIPE, stdout=PIPE)
 		out, err = p.communicate()
 		sum_time_hybrid += getTotTime(out.decode("utf-8"))
 
