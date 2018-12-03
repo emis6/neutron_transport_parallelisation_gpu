@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
 
     c = c_c + c_s;
 
-    int j = 0; // compteurs 
+    // int j = 0; // compteurs 
 
 
 
