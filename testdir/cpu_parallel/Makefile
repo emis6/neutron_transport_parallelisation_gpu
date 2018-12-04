@@ -17,6 +17,8 @@ neutron-par-cpu: neutron-par-cpu.o
 	g++  -o $@ $+ -lm -fopenmp
 
 
+exec: all
+	./${EXE_NAME}
 
 clean:
 	rm -f ${EXE_NAME} *.o *~

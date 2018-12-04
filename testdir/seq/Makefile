@@ -17,5 +17,8 @@ neutron-seq: neutron-seq.o
 	$(CC)  -o $@ $+ -lm
 
 
+exec: all
+	./${EXE_NAME}
+
 clean:
 	rm -f ${EXE_NAME} *.o *~

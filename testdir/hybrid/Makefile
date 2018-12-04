@@ -18,5 +18,8 @@ neutron-test : neutron-test.o
 	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
 
 
+exec: all
+	./${EXE_NAME}
+	
 clean:
 	rm -f ${EXE_NAME} *.o *~
