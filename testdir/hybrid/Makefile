@@ -1,6 +1,6 @@
-SRCS =  neutron-test.cu 
-EXE_NAME = neutron-test  
-OBJECTS = neutron-test.o 
+SRCS =  neutron-hyb.cu 
+EXE_NAME = neutron-hyb  
+OBJECTS = neutron-hyb.o 
 
 CC = gcc
 CFLAGS = -O3 -arch=sm_20 -lineinfo   #-std=c11
@@ -11,10 +11,10 @@ NVCC= /usr/local/cuda/bin/nvcc -Xcompiler -fopenmp
 all: ${EXE_NAME}
 
 
-neutron-test.o : neutron-test.cu
+neutron-hyb.o : neutron-hyb.cu
 	$(NVCC) -c $(CFLAGS) $< 
 
-neutron-test : neutron-test.o
+neutron-hyb : neutron-hyb.o
 	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
 
 

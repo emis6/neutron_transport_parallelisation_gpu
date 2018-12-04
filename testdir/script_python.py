@@ -58,7 +58,7 @@ for i in range(0, len(n)):
 
 		print("finished CPU par")
 
-		p = Popen(['./neutron-test', str(h), str(n[i]) ], shell=False, stdin=PIPE, stdout=PIPE)
+		p = Popen(['./neutron-hyb', str(h), str(n[i]) ], shell=False, stdin=PIPE, stdout=PIPE)
 		out, err = p.communicate()
 		sum_time_hybrid += getTotTime(out.decode("utf-8"))
 

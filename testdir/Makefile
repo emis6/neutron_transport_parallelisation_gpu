@@ -1,6 +1,6 @@
-SRCS =  ./gpu/neutron.cu ./seq/neutron-seq.c ./hybrid/neutron-test.cu ./cpu_parallel/neutron-par-cpu.cpp
-EXE_NAME = neutron neutron-seq neutron-test  neutron-par-cpu
-OBJECTS = neutron.o neutron-seq.o neutron-test.o neutron-par-cpu.o
+SRCS =  ./gpu/neutron.cu ./seq/neutron-seq.c ./hybrid/neutron-hyb.cu ./cpu_parallel/neutron-par-cpu.cpp
+EXE_NAME = neutron neutron-seq neutron-hyb  neutron-par-cpu
+OBJECTS = neutron.o neutron-seq.o neutron-hyb.o neutron-par-cpu.o
 
 CC = gcc
 CFLAGS = -O3 -arch=sm_20 -lineinfo   #-std=c11
@@ -19,10 +19,10 @@ neutron : neutron.o
 	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
 
 
-neutron-test.o : ./hybrid/neutron-test.cu
+neutron-hyb.o : ./hybrid/neutron-hyb.cu
 	$(NVCC) -c $(CFLAGS) $< 
 
-neutron-test : neutron-test.o
+neutron-hyb : neutron-hyb.o
 	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
 
 
