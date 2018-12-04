@@ -16,7 +16,7 @@ neutron.o : neutron.cu
 neutron : neutron.o
 	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
 
-exec: ./${EXE_NAME}
+exec: ./neutron
 
 clean:
 	rm -f ${EXE_NAME} *.o *~
