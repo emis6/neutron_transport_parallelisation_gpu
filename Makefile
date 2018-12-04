@@ -1,6 +1,6 @@
-SRCS = neutron-omp.cu neutron-omp2.cu neutron.cu neutron-seq.c neutron-test.cu neutron-par-cpu.cpp
-EXE_NAME = neutron-omp neutron-omp2 neutron neutron-seq neutron-test neutron-par-cpu
-OBJECTS = neutron-omp.o neutron-omp2.o neutron.o neutron-seq.o neutron-test.o neutron-par-cpu.o
+SRCS =  neutron.cu neutron-seq.c neutron-test.cu neutron-par-cpu.cpp
+EXE_NAME = neutron neutron-seq neutron-test neutron-par-cpu
+OBJECTS =  neutron.o neutron-seq.o neutron-test.o neutron-par-cpu.o
 
 CC = gcc
 CFLAGS = -O3 -arch=sm_20 -lineinfo   #-std=c11

@@ -1,6 +1,6 @@
 SRCS =  ./gpu/neutron.cu ./seq/neutron-seq.c ./hybrid/neutron-test.cu ./cpu_parallel/neutron-par-cpu.cpp
-EXE_NAME = ./gpu/neutron ./seq/neutron-seq ./hybrid/neutron-test ./cpu_parallel/neutron-par-cpu
-OBJECTS = ./gpu/neutron.o ./seq/neutron-seq.o ./hybrid/neutron-test.o ./cpu_parallel/neutron-par-cpu.o
+EXE_NAME = neutron neutron-seq neutron-test  neutron-par-cpu
+OBJECTS = neutron.o neutron-seq.o neutron-test.o neutron-par-cpu.o
 
 CC = gcc
 CFLAGS = -O3 -arch=sm_20 -lineinfo   #-std=c11
@@ -11,31 +11,31 @@ NVCC= /usr/local/cuda/bin/nvcc -Xcompiler -fopenmp
 all: ${EXE_NAME}
 
 
-./gpu/neutron.o : ./gpu/neutron.cu
+neutron.o : ./gpu/neutron.cu
 	$(NVCC) -c $(CFLAGS) $< 
 
-./gpu/neutron : ./gpu/neutron.o
+neutron : neutron.o
 	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
 
 
-./hybrid/neutron-test.o : ./hybrid/neutron-test.cu
+neutron-test.o : ./hybrid/neutron-test.cu
 	$(NVCC) -c $(CFLAGS) $< 
 
-./hybrid/neutron-test : ./hybrid/neutron-test.o
+neutron-test : neutron-test.o
 	${NVCC} ${CFLAGS} -o $@ $+ ${LIB}
 
 
-./seq/neutron-seq.o : neutron-seq.c
+neutron-seq.o : ./seq/neutron-seq.c
 	$(CC) -c  $< 
 
-./seq/neutron-seq: neutron-seq.o
+neutron-seq: neutron-seq.o
 	$(CC)  -o $@ $+ -lm
 
 
-./cpu_parallel/neutron-par-cpu.o : neutron-par-cpu.cpp
+neutron-par-cpu.o : ./cpu_parallel/neutron-par-cpu.cpp
 	g++ -c -O3  $< 
 
-./cpu_parallel/neutron-par-cpu: neutron-par-cpu.o
+neutron-par-cpu: neutron-par-cpu.o
 	g++  -o $@ $+ -lm -fopenmp
 
 
