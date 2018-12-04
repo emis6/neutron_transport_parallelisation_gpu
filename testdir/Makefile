@@ -8,6 +8,7 @@ LIB=-lm -L/usr/local/cuda/lib64/ -lcuda -lcudart #-openmp
 NVCC= /usr/local/cuda/bin/nvcc -Xcompiler -fopenmp
 
 
+
 all: ${EXE_NAME}
 
 
