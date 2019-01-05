@@ -126,7 +126,8 @@ __global__ void generate_kernel(curandState *state,
   t=atomicAdd(T,t);
   */
   state[id] = localState;
-
+  // added here janvier
+  __syncthreads();
 }
 
 
