@@ -3,8 +3,8 @@ EXE_NAME = neutron neutron-seq neutron-hyb  neutron-par-cpu
 OBJECTS = neutron.o neutron-seq.o neutron-hyb.o neutron-par-cpu.o
 
 CC = gcc
-CFLAGS = -O3 -arch=sm_20 -lineinfo   #-std=c11
-LIB=-lm -L/usr/local/cuda/lib64/ -lcuda -lcudart #-openmp
+CFLAGS = -O3 -arch=sm_20 -lineinfo
+LIB=-lm -L/usr/local/cuda/lib64/ -lcuda -lcudart 
 NVCC= /usr/local/cuda/bin/nvcc -Xcompiler -fopenmp
 
 

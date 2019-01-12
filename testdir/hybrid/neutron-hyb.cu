@@ -38,7 +38,7 @@ float uniform_random_number() {
   return res;
 }
 
-/* setup_kernel <<<NbBlocks,NbThreadsParBloc>>> (devStates,unsigned(time(NULL))); //initialisation de l'état curandState pour chaque thread
+/* 
  * notre gettimeofday()
  */
 double my_gettimeofday(){
@@ -57,7 +57,6 @@ __global__ void setup_kernel(curandState *state)
 }
 
 
-  //int id = threadIdx.x + blockIdx.x * blockDim.x;
 
 
 
@@ -86,6 +85,7 @@ __global__ void generate_kernel(curandState *state,
     int fin_for = (id+1)*step;
 
     if(id == nbThread) fin_for = N;
+
   //#pragma omp parallel for private(x, u, d, L) reduction(+:t,r,b)
     for (int i = debut_for; i < fin_for; i++) {
         d = 0.0;
@@ -129,18 +129,13 @@ __syncthreads();
         }
         k/=2;
         __syncthreads();
-    }
-    if(threadIdx.x==0){
+    } 
+    if(threadIdx.x==0){     //Copy state back to global memory 
         atomicAdd(R,Rtab[0]);
         atomicAdd(B,Btab[0]);
         atomicAdd(T,Ttab[0]);
     }
 
-  /* Copy state back to global memory 
-  r=atomicAdd(R,r);
-  b=atomicAdd(B,b);
-  t=atomicAdd(T,t);
-  */
     state[id] = localState;
 
 }
@@ -153,7 +148,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    float *absorbed, *absorbed_gpu, *absorbed_cpu;
+    float *absorbed_gpu, *absorbed_cpu;
     float c, c_c, c_s;
     // épaisseur de la plaque
     float h;
@@ -168,7 +163,7 @@ int main(int argc, char *argv[]) {
     double start, finish;
     int j = 0; // compteurs 
 
-    float pourcentage_gpu = 0.80;
+    float pourcentage_gpu = 0.8;
 
     if( argc == 1)
         fprintf( stderr, "%s\n", info);
@@ -188,16 +183,12 @@ int main(int argc, char *argv[]) {
         c_c = atof(argv[3]);
     if (argc > 4)
         c_s = atof(argv[4]);
-    r = b = t = 0;
-    
-    r_gpu= b_gpu= t_gpu = 0;
-    r_cpu = b_cpu= t_cpu=0;
-
     c = c_c + c_s;
 
-    // int j = 0; // compteurs 
-
-
+    //compteurs
+    r = b = t = 0;
+    r_gpu= b_gpu= t_gpu = 0;
+    r_cpu = b_cpu= t_cpu=0;
 
 
     // affichage des parametres pour verificatrion
@@ -208,18 +199,19 @@ int main(int argc, char *argv[]) {
 
 n_loc = (int)(pourcentage_gpu * n);
             //n_loc = n - 10000000;
-            printf("Dans le thread numero : %d avec %d nombre de neutron(GPU) avec n = %d \n", omp_get_thread_num(), n_loc , n);
+           
+            
 
-            absorbed_gpu = (float *) calloc(n_loc, sizeof(float));
 
-      /* allocation de memoire GPU*/
-
+    
             float *d_absorbed;
             int size = n_loc*sizeof(float);
             cudaMalloc((void**)&d_absorbed, size);
 
             int *d_r, *d_b, *d_t, *d_j;
-            cudaMalloc((void**)&d_r, sizeof(int));
+           
+
+         cudaMalloc((void**)&d_r, sizeof(int));
             cudaMalloc((void**)&d_b, sizeof(int));
             cudaMalloc((void**)&d_t, sizeof(int));
             cudaMalloc((void**)&d_j, sizeof(int));
@@ -251,6 +243,8 @@ n_loc = (int)(pourcentage_gpu * n);
         /* Allocation un vecteur d'etat par thread */
             cudaMalloc((void **)&d_States, nbThread*sizeof(curandState));  
     
+     
+
 
 
       // debut du chronometrage
@@ -258,53 +252,13 @@ n_loc = (int)(pourcentage_gpu * n);
 
     #pragma omp parallel num_threads(2)
     {
-        printf("I should be two! \n");
+       
         if( omp_get_thread_num()== 0) // fait GPU
         {
-    //         n_loc = (int)(pourcentage_gpu * n);
-    //         //n_loc = n - 10000000;
-    //         printf("Dans le thread numero : %d avec %d nombre de neutron(GPU) avec n = %d \n", omp_get_thread_num(), n_loc , n);
 
-    //         absorbed_gpu = (float *) calloc(n_loc, sizeof(float));
-
-    //   /* allocation de memoire GPU*/
-
-    //         float *d_absorbed;
-    //         int size = n_loc*sizeof(float);
-    //         cudaMalloc((void**)&d_absorbed, size);
-
-    //         int *d_r, *d_b, *d_t;
-    //         cudaMalloc((void**)&d_r, sizeof(int));
-    //         cudaMalloc((void**)&d_b, sizeof(int));
-    //         cudaMalloc((void**)&d_t, sizeof(int));
-
-    // // Transfert CPU -> GPU
-    //         cudaMemcpy(d_absorbed, absorbed_gpu, size, cudaMemcpyHostToDevice);
-    //         cudaMemcpy(d_r, &r_gpu, sizeof(int), cudaMemcpyHostToDevice);
-    //         cudaMemcpy(d_b, &b_gpu, sizeof(int), cudaMemcpyHostToDevice);
-    //         cudaMemcpy(d_t, &t_gpu, sizeof(int), cudaMemcpyHostToDevice);
-
-    // // Definition nombre de threads
-    //         dim3 TailleGrille, ThreadparBlock;
-
-    //         ThreadparBlock.x = 1024; //32*32
-    //         ThreadparBlock.y = 1;
-    //         ThreadparBlock.z = 1;
+absorbed_gpu = (float *) calloc(n_loc, sizeof(float)); 
     
-    //         TailleGrille.x = 1024;
-    //         TailleGrille.y = 1;
-    //         TailleGrille.z = 1;
-    
-    
-    //         int nbThread = TailleGrille.x*ThreadparBlock.x;
-    
-    //         int step = n_loc/nbThread; //nb de neutrons gérés par chaque thread
-    
-    //         curandState *d_States;
-    //     /* Allocation un vecteur d'etat par thread */
-    //         cudaMalloc((void **)&d_States, nbThread*sizeof(curandState));  
-    
-    
+     
         //appel kernel1 : initialisation states
             setup_kernel<<<TailleGrille,ThreadparBlock>>>(d_States);
     
@@ -318,23 +272,22 @@ n_loc = (int)(pourcentage_gpu * n);
             cudaMemcpy(&b_gpu, d_b, sizeof(int), cudaMemcpyDeviceToHost);
             cudaMemcpy(&t_gpu, d_t, sizeof(int), cudaMemcpyDeviceToHost);
 
+            printf("--------> b = %d b = %d t= %d", r_gpu, b_gpu, t_gpu);
+
             cudaFree(d_absorbed);
             cudaFree(d_States);
             cudaFree(d_r);
             cudaFree(d_b);
             cudaFree(d_t);
 
-            printf("r = %d b= %d t=%d\n",r_gpu, b_gpu, t_gpu );
-
-            // printf("\nPourcentage des neutrons refléchis GPU : %4.2g\n", (float) r_gpu / (float) n*pourcentage_gpu);
-            // printf("Pourcentage des neutrons absorbés GPU: %4.2g\n", (float) b_gpu / (float) n*pourcentage_gpu);
-            // printf("Pourcentage des neutrons transmis GPU: %4.2g\n", (float) t_gpu / (float) n*pourcentage_gpu);
         
         }
 
         else if(omp_get_thread_num()== 1) // fait CPU
         {
             n_loc = (int)( (1.0 - pourcentage_gpu) * n);
+            
+                    
             float L;
             // direction du neutron (0 <= d <= PI)
             float d;
@@ -344,8 +297,7 @@ n_loc = (int)(pourcentage_gpu * n);
             float x;
             j =0;
 
-            printf("Dans le thread numero : %d avec %d nombre de neutron(CPU) \n", omp_get_thread_num(), n_loc );
-
+            
             //float *absorbed_cpu;
             absorbed_cpu = (float *) calloc(n_loc, sizeof(float));
                 
@@ -355,8 +307,6 @@ n_loc = (int)(pourcentage_gpu * n);
               for (i = 0; i < n_loc; i++) {
                 d = 0.0;
                 x = 0.0;
-                
-               // printf("-----------for thread numero : %d  \n", omp_get_thread_num() );
 
                 while (1) {
             
@@ -385,9 +335,6 @@ n_loc = (int)(pourcentage_gpu * n);
         }
     } // fin de parallel
             
-
-            // printf("r_cpu = %d\t b_cpu = %d\t \n",  );
-
             // Calcul de vrais r, b, t:
             r = r_cpu + r_gpu;
             b = b_cpu + b_gpu;
@@ -413,7 +360,7 @@ n_loc = (int)(pourcentage_gpu * n);
             printf("\nTemps total de calcul: %.8g sec\n", finish - start);
             printf("Millions de neutrons /s: %.2g\n", (double) n / ((finish - start)*1e6));
 
-    //        printf("sum: %d\n", b+ t+ r );
+
     // ouverture du fichier pour ecrire les positions des neutrons absorbés
             FILE *f_handle = fopen(OUTPUT_FILE, "w");
             if (!f_handle) {
@@ -433,6 +380,7 @@ n_loc = (int)(pourcentage_gpu * n);
             fclose(f_handle);
             printf("Result written in " OUTPUT_FILE "\n"); 
     
-            //free(absorbed_gpu);
+            free(absorbed_cpu);
+            free(absorbed_gpu);
     
 }

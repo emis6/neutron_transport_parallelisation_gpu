@@ -110,12 +110,9 @@ int main(int argc, char *argv[]) {
   start = my_gettimeofday();
     
   init_uniform_random_number();
-#pragma omp parallel num_threads(4)
+#pragma omp parallel num_threads(2)
 {
 
-/* shoud I put u et x et L on private???!! */
-
-  //#pragma omp for
 #pragma omp parallel for private(x, u, d, L) reduction(+:t,r,b)
 for (i = 0; i < n; i++) {
     d = 0.0;
@@ -128,13 +125,12 @@ for (i = 0; i < n; i++) {
       x = x + L * cos(d);
       if (x < 0) 
 	{
-//#pragma omp atomic
 	  r++;
 	  break;
         } 
 	else if (x >= h) 
 	{
-//#pragma omp atomic
+
        	  t++;
 	  break;
       } 

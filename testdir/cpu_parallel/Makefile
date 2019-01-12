@@ -3,10 +3,6 @@ EXE_NAME = neutron-par-cpu
 OBJECTS = neutron-par-cpu.o
 
 CC = gcc
-CFLAGS = -O3 -arch=sm_20 -lineinfo   #-std=c11
-LIB=-lm -L/usr/local/cuda/lib64/ -lcuda -lcudart #-openmp
-NVCC= /usr/local/cuda/bin/nvcc -Xcompiler -fopenmp
-
 
 all: ${EXE_NAME}
 

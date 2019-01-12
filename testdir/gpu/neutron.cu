@@ -37,7 +37,7 @@ __global__ void setup_kernel(curandState *state)
     int id = threadIdx.x + blockIdx.x * blockDim.x;
     /* Each thread gets same seed, a different sequence 
        number, no offset */
-    curand_init(0, id, 0, &state[id]);
+    curand_init(0,id, 0, &state[id]);
 }
 
 
@@ -120,20 +120,17 @@ __global__ void generate_kernel(curandState *state,
         atomicAdd(T,Ttab[0]);
     }
  
-  /* Copy state back to global memory 
-  r=atomicAdd(R,r);
-  b=atomicAdd(B,b);
-  t=atomicAdd(T,t);
-  */
+
   state[id] = localState;
-  // added here janvier
-  __syncthreads();
+
 }
 
 
 
 int main(int argc, char *argv[]) {
-    // La distance moyenne entre les interactions neutron/atome est 1/c. 
+   
+
+ // La distance moyenne entre les interactions neutron/atome est 1/c. 
     // c_c et c_s sont les composantes absorbantes et diffusantes de c. 
     float c, c_c, c_s;
     // épaisseur de la plaque
@@ -174,6 +171,7 @@ int main(int argc, char *argv[]) {
     printf("C_s : %g\n", c_s);
 
 
+
     float *absorbed;
     absorbed = (float *) calloc(n, sizeof(float));
 
@@ -200,11 +198,11 @@ int main(int argc, char *argv[]) {
     // Definition nombre de threads
     dim3 TailleGrille, ThreadparBlock;
 
-    ThreadparBlock.x = 1024; //32*32
+    ThreadparBlock.x = 256; //32*32
     ThreadparBlock.y = 1;
     ThreadparBlock.z = 1;
 
-    TailleGrille.x = 1024;
+    TailleGrille.x = 256;
     TailleGrille.y = 1;
     TailleGrille.z = 1;
 
@@ -217,8 +215,7 @@ int main(int argc, char *argv[]) {
     /* Allocation un vecteur d'etat par thread */
     cudaMalloc((void **)&d_States, nbThread*sizeof(curandState));  
 
-    
-    // debut du chronometrage
+        // debut du chronometrage
     start = my_gettimeofday();
 
     //appel kernel1 : initialisation states
@@ -227,8 +224,7 @@ int main(int argc, char *argv[]) {
     //appel kernel2 : calcul
     generate_kernel<<<TailleGrille,ThreadparBlock>>>(d_States,step,nbThread,TailleGrille,n,c,c_c,h,d_r,d_b,d_t,d_absorbed, d_j);
 
-    // fin du chronometrage
-    finish = my_gettimeofday();
+   
 
     // Transfert GPU-> CPU
     cudaMemcpy(absorbed, d_absorbed, size, cudaMemcpyDeviceToHost);
@@ -236,7 +232,8 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(&b, d_b, sizeof(int), cudaMemcpyDeviceToHost);
     cudaMemcpy(&t, d_t, sizeof(int), cudaMemcpyDeviceToHost);
 
-
+ // fin du chronometrage
+    finish = my_gettimeofday();
 
     printf("\nPourcentage des neutrons refléchis : %4.2g\n", (float) r / (float) n);
     printf("Pourcentage des neutrons absorbés : %4.2g\n", (float) b / (float) n);
